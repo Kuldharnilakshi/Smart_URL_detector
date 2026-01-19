@@ -1,7 +1,10 @@
 async function checkURL() {
-  const url = document.getElementById("urlInput").value;
+  const urlInput = document.getElementById("urlInput");
   const resultDiv = document.getElementById("result");
 
+  const url = urlInput.value.trim();
+
+  // Validation
   if (!url) {
     resultDiv.style.display = "block";
     resultDiv.className = "dangerous";
@@ -9,12 +12,13 @@ async function checkURL() {
     return;
   }
 
+  // Loading state
   resultDiv.style.display = "block";
-  resultDiv.className = "";
-  resultDiv.innerText = "🔍 Analyzing URL...";
+  resultDiv.className = "loading";
+  resultDiv.innerText = "🔍 Analyzing URL security...";
 
   try {
-    const response = await fetch("http://127.0.0.1:5000/check-url", {
+    const response = await fetch("/check-url", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -22,8 +26,13 @@ async function checkURL() {
       body: JSON.stringify({ url }),
     });
 
+    if (!response.ok) {
+      throw new Error("API request failed");
+    }
+
     const data = await response.json();
 
+    // Decide UI color
     if (data.status.includes("Safe")) {
       resultDiv.className = "safe";
     } else if (data.status.includes("Suspicious")) {
@@ -32,13 +41,22 @@ async function checkURL() {
       resultDiv.className = "dangerous";
     }
 
+    // Build result UI
     resultDiv.innerHTML = `
-      <strong>Status:</strong> ${data.status}<br>
-      <strong>Malicious:</strong> ${data.malicious}<br>
-      <strong>Suspicious:</strong> ${data.suspicious}
+      <h3>🔐 Scan Result</h3>
+      <p><strong>Status:</strong> ${data.status}</p>
+      <p><strong>Category:</strong> ${data.category}</p>
+      <p><strong>Malicious Detections:</strong> ${data.malicious}</p>
+      <p><strong>Suspicious Detections:</strong> ${data.suspicious}</p>
+      ${
+        data.suggestion
+          ? `<p class="suggestion">⚠ ${data.suggestion}</p>`
+          : ""
+      }
     `;
   } catch (error) {
+    console.error(error);
     resultDiv.className = "dangerous";
-    resultDiv.innerText = "⚠ Server connection failed";
+    resultDiv.innerText = "⚠ Server connection failed. Try again later.";
   }
 }

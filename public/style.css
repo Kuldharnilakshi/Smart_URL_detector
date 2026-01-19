@@ -34,6 +34,11 @@ input {
   border-radius: 8px;
   border: 1px solid #ccc;
   font-size: 14px;
+  outline: none;
+}
+
+input:focus {
+  border-color: #5b86e5;
 }
 
 button {
@@ -61,6 +66,7 @@ button:hover {
   display: none;
 }
 
+/* Result states */
 .safe {
   background: #e6f9f0;
   color: #0a8f55;
@@ -76,6 +82,12 @@ button:hover {
   color: #d93025;
 }
 
+.loading {
+  background: #eef2ff;
+  color: #3730a3;
+}
+
+/* Animation */
 @keyframes fadeIn {
   from {
     transform: translateY(15px);

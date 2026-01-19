@@ -1,0 +1,18 @@
+{
+  "name": "smart-url-detector",
+  "version": "1.0.0",
+  "description": "Smart URL Detection using VirusTotal API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

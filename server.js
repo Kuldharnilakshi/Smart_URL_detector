@@ -2,10 +2,12 @@ require("dotenv").config();
 const express = require("express");
 const axios = require("axios");
 const path = require("path");
+const cors = require("cors");
 
 const app = express();
 
 // Middleware
+app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -14,9 +16,7 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// -----------------------------
 // 🔐 VirusTotal URL Check API
-// -----------------------------
 app.post("/check-url", async (req, res) => {
   const { url } = req.body;
 
@@ -27,10 +27,8 @@ app.post("/check-url", async (req, res) => {
   try {
     const apiKey = process.env.VT_API_KEY;
 
-    // Step 1: Encode URL (VirusTotal requirement)
     const encodedUrl = Buffer.from(url).toString("base64").replace(/=/g, "");
 
-    // Step 2: Call VirusTotal
     const vtResponse = await axios.get(
       `https://www.virustotal.com/api/v3/urls/${encodedUrl}`,
       {
@@ -41,21 +39,17 @@ app.post("/check-url", async (req, res) => {
     );
 
     const stats = vtResponse.data.data.attributes.last_analysis_stats;
-
     const malicious = stats.malicious || 0;
     const suspicious = stats.suspicious || 0;
 
-    // Step 3: Determine status
     let status = "Safe 🟢";
     if (malicious > 0) status = "Dangerous 🔴";
     else if (suspicious > 0) status = "Suspicious 🟡";
 
-    // Step 4: Category
     let category = "Safe";
     if (malicious > 0) category = "Malware / Phishing";
     else if (suspicious > 0) category = "Suspicious";
 
-    // Step 5: Brand impersonation (simple heuristic)
     let suggestion = "";
     if (url.includes("g00gle")) {
       status = "Suspicious 🟡";
@@ -78,9 +72,7 @@ app.post("/check-url", async (req, res) => {
   }
 });
 
-// -----------------------------
-// 🌐 Start Server (Render-safe)
-// -----------------------------
+// Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
